@@ -8,11 +8,18 @@ using TMPro;
 public class MenuHandler : MonoBehaviour
 {
     public TMP_InputField inputText;
+    public TMP_Text bestScoreText;
     private void Start()
     {
+        DataManagement.instance.LoadData();
         if (inputText != null && !string.IsNullOrEmpty(DataManagement.instance.Username))
         {
             inputText.text = DataManagement.instance.Username;
+        }
+        if (bestScoreText != null)
+        {
+            bestScoreText.text = "Best Score : " + DataManagement.instance.Username + " : " +
+                DataManagement.instance.BestScore.ToString();
         }
     }
     public void StartGame()
@@ -24,6 +31,12 @@ public class MenuHandler : MonoBehaviour
     public void BackToMenu()
     {
         SceneManager.LoadScene(0);
+    }
+
+    public void DeleteData()
+    {
+        DataManagement.instance.DeleteData();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
     public void QuitGame()
