@@ -11,11 +11,15 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
-    
+    public Text currentUserText;
+
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
+
+    private bool m_save = false;
+    private bool isReplay = true;
 
     public Text Username;
 
@@ -26,7 +30,9 @@ public class MainManager : MonoBehaviour
     void Start()
     {
         DataManagement.instance.LoadData();
-        Username.text = "Best Score : " + DataManagement.instance.Username + $" : {DataManagement.instance.BestScore}";
+        currentUserText.text = currentUserText.text + DataManagement.instance.Username;
+        Username.text = DataManagement.instance.bestScore[0] != "" ? "Best Score : " + 
+            DataManagement.instance.bestScore[0].Substring(3) : "Best Score : ";
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -60,14 +66,48 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
-            if (m_Points > DataManagement.instance.BestScore)
+            if (isReplay)
             {
-                DataManagement.instance.BestScore = m_Points;
-                Username.text = "Best Score : " + DataManagement.instance.Username + $" : {DataManagement.instance.BestScore}";
-                DataManagement.instance.SaveUserData();
+                isReplay = false;
+                for (int i = 0; i < DataManagement.instance.bestScore.Count; i++)
+                {
+                    string temp = "";
+                    for (int j = DataManagement.instance.bestScore[i].Length; j > 0; j--)
+                    {
+                        try
+                        {
+                            temp = int.Parse(DataManagement.instance.bestScore[i].Substring(j - 1)).ToString();
+                        }
+                        catch (System.Exception)
+                        {
+                            break;
+                        }
+
+                    }
+
+                    if (temp != "" && m_Points > int.Parse(temp))
+                    {
+                        m_save = true;
+                        DataManagement.instance.currentScore = m_Points;
+                        break;
+                    }
+
+                }
+                if (m_Points > DataManagement.instance.BestScore)
+                {
+                    m_save = true;
+                    DataManagement.instance.BestScore = m_Points;
+                    Username.text = "Best Score : " + DataManagement.instance.Username + $" : {DataManagement.instance.BestScore}";
+                }
+                if (m_save)
+                {
+                    m_save = false;
+                    DataManagement.instance.BestScoreSaveData();
+                }
             }
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                isReplay = true;
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
